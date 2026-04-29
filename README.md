@@ -1,8 +1,6 @@
 # Agent d'automatisation de veille technologique IA
 
-Cet agent automatise une veille hebdomadaire sur les nouvelles sorties d’outils et de modèles d’IA générative. Il collecte, analyse, déduplique et synthétise les informations issues de différentes sources afin de générer automatiquement une newsletter envoyée automatiquement.
-
-Pour cela, il s’appuie sur une sélection de sources dont il extrait et regroupe les informations afin de rédiger une description pour chaque outil présenté. Ces descriptions sont ensuite confrontées à une base de données contenant celles des semaines précédentes afin de mettre à jour la base de données et d’éviter les redondances d’informations par rapport aux newsletters précédentes. Enfin, l’agent génère une newsletter à partir de ces informations dans un format html donnée et l’envoie à une liste d’adresses e-mail.
+Cet agent automatise une veille hebdomadaire sur les nouvelles sorties d’outils et de modèles d’IA générative. Pour cela, il s’appuie sur une sélection de sources dont il extrait et regroupe les informations afin de rédiger une description pour chaque outil présenté. Ces descriptions sont ensuite confrontées à une base de données contenant celles des semaines précédentes afin de mettre à jour la base de données et d’éviter les redondances d’informations par rapport aux newsletters précédentes. Enfin, l’agent génère une newsletter à partir de ces informations dans un format html donnée et l’envoie à une liste d’adresses e-mail.
 
 ---
 
