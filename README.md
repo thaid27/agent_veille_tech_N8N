@@ -1,49 +1,152 @@
-# Agent pour l'automatisation du processus de veille technologique 
+# Agent d'automatisation de veille technologique IA
 
-Cet agent effectue une recherche hebdomadaire à propos des nouvelles sorties d'outils et de modèles d'IA générative. Pour cela, il se base sur une sélection de sources choisis dont il extrait les informations voulues et les rassemble afin de définir une description pour chaque outil présenté dans les sources. Chacune de ces descriptions est alors confronté à une base de données contenant les information des semaines passées afin de mettre à jour ces descriptions et d'éviter les redites avant d'y être stockées. Enfin, l'agent génère une newletter avec ces informations et l'envoie à une liste d'emails.   
+Cet agent automatise une veille hebdomadaire sur les nouvelles sorties d’outils et de modèles d’IA générative. Il collecte, analyse, déduplique et synthétise les informations issues de différentes sources afin de générer automatiquement une newsletter envoyée automatiquement.
 
-## Fonctionnement détaillé de l'agent 
-
-**Gestion des sources :**
-
-Les informations proviennent de deux types de sources necessitant un traitement différent pour obtenir les éléments recherchés :
-- site web et blogs : traitement du flux rss pour récupérer le champ contenant le texte de la page
-- chaines youtube orienté technologies IA :
-    - utilisation de YoutubeDataAPI (API officiel de youtube) pour récupérer les identifiants des vidéos de la chaines sortie cette semaine ainsi que la description des vidéos contenant les liens des outils présentés 
-    - les transcriptions issues de la génération automatique de youtube sont alors récupérées via une API externe hébergée sur RapidAPI (non récupérable via YoutubeDataAPI)
-
-**Traitement des données bruts :**
-
-À l'issue de la première étape, on obtient des données textes sous forme de transcriptions et d'articles. Un premier LLM extrait l'information concernant chaque outils cités dans ces sources et la formatte pour obtenir les éléments attendues pour chacun (nom, description, charactéristiques principales, éléments différenciants, comparaison avec d'autres outils du même type, lien). Ici et par la suite, le LLM utilisé est GPT-5-mini hebergé sur Azure. 
-
-Une deuxième passe dans le LLM est effectué fournissant l'ensemble des descriptions d'outils afin de rassembler celles concernant les mêmes. Cette étape est effectué en deux temps par soucis de limite de tokens d'entrée pour le LLM et de perte d'informations liées à un trop gros nombre de tokens d'entrée. 
-
-**Comparaison avec la base de données et mise à jour des descriptions**
-
-Chaque description obtenue est confrontée à une base de données Azure Search contenant les descriptions des semaines précédentes pour éviter les redites par rapport aux précédentes newsletters, tout en permettant de mettre à jour les informations concernant ces outils avec d'éventuels nouveaux éléments évoquées cette semaine à leur sujet. Les nouveaux outils et mises à jour sont envoyés à la base de données. 
-
-**Génération de la newsletter**
-
-Enfin les descriptions d'outils sont rassemblés afin de générer une newsletter 
-
-
-## Schéma de l'agent 
-
-image
-
-## Exemple de newletters 
-
-image
-
-## Plus value apporté 
-
-Une recherche précise et détaillé par le choix des sources d'informations de confiance et des éléments d'importance
-Vérification avec la base de données pour avoir des informations à jour concernant les technologies recherchées ainsi 
-
-
+Pour cela, il s’appuie sur une sélection de sources dont il extrait et regroupe les informations afin de rédiger une description pour chaque outil présenté. Ces descriptions sont ensuite confrontées à une base de données contenant celles des semaines précédentes afin de mettre à jour la base de données et d’éviter les redondances d’informations par rapport aux newsletters précédentes. Enfin, l’agent génère une newsletter à partir de ces informations dans un format html donnée et l’envoie à une liste d’adresses e-mail.
 
 ---
 
-# Reproduction
+## Fonctionnalités
 
-Le workflow n8n utilisé est disponible ici mais il est nécessaire d'ajouter les clés et endpoints de l'utilisateur pour les serives API utilisés (RapidAPI, YoutubeDataAPI, OpenAI, Gmail, . Pour la personalisation de l'agent, il est aussi possible de changer les sources récherchées afin de changer de sujet pour la newletters et les prompts afin de changer les informations à extraire. Enfin, le changement du format de mail en html est possible pour obtenir le visuel voulu pour la newsletters.   
+- Collecte automatisée d’informations (RSS + YouTube)
+- Extraction et structuration des information vouluvia LLM (GPT-5-mini sur Azure)
+- Déduplication et enrichissement via base de données
+- Historisation des outils (Azure Search)
+- Génération automatique de newsletter HTML
+- Envoi automatisé via Gmail
+
+---
+
+## Fonctionnement
+
+### 1. Gestion des sources
+
+Deux types de sources sont exploités :
+
+#### Sites web et blogs
+- Lecture des flux RSS
+- Extraction du champ contenant les articles
+
+#### Chaînes YouTube (IA)
+- Utilisation de **YouTube Data API** :
+  - Récupération des vidéos publiées dans la semaine
+  - Extraction des descriptions (contenant les liens d’outils explorés)
+- Récupération des **transcriptions** via une API externe (RapidAPI)
+
+---
+
+### 2. Traitement des données
+
+- Données d’entrée : articles + transcriptions
+- Traitement via un LLM :
+  - Extraction des outils mentionnés
+  - Structuration des informations :
+    - Nom
+    - Description
+    - Caractéristiques principales
+    - Éléments différenciants
+    - Comparaisons
+    - Lien
+
+Modèle utilisé : **GPT-5-mini (Azure OpenAI)**
+
+---
+
+### 3. Regroupement des informations par outil
+
+- Fusion des descriptions concernant un même outil
+- Traitement en plusieurs passes pour :
+  - éviter les limites de tokens par requête
+  - préserver la qualité des informations
+
+---
+
+### 4. Déduplication et mise à jour
+
+- Comparaison des descriptions d'outils avec une base de données **Azure Search**
+- Objectifs :
+  - éviter les redites dans les newsletters
+  - enrichir les fiches des outils existantes
+- Ajout des nouveaux outils et mises à jour de la base de données
+
+---
+
+### 5. Génération de la newsletter
+
+- Génération d’une newsletter en **HTML**
+- Structuration automatique via LLM
+- Injection de la date du jour
+- Envoi via **Gmail** à une liste de destinataires
+
+---
+
+## Architecture
+
+image
+
+---
+
+## Exemple de newsletter
+
+image
+
+---
+
+## Valeur ajoutée
+
+### Gain de temps
+Automatisation complète d’une veille hebdomadaire (plusieurs heures à environ 15 minutes)
+
+### Qualité de la recherche
+- Sources sélectionnées et fiables
+- Extraction structurée des éléments ciblés 
+
+### Continuité
+- Base de données pouvant services de bases pour d'autres services (ex: RAG)
+- Mise à jour des outils existants hebdimadaires assurant la pertinance des informations
+- Aucune redondance dans les newsletters pour conserver l'intérêt des lecteurs
+
+---
+
+## Reproduction
+
+### Prérequis
+
+**API et comptes :**
+- Azure OpenAI
+- Azure Search
+- YouTube Data API
+- RapidAPI
+- Gmail
+
+### Configuration
+
+1. Importer le workflow n8n
+2. Ajouter les credentials :
+   - API keys
+   - endpoints
+3. Configurer :
+   - les sources (RSS / YouTube)
+   - les prompts LLM
+   - le template HTML de la newsletter
+4. Définir la liste des destinataires
+5. Connecter Gmail
+
+---
+
+## Personnalisation
+
+- Modifier les sources pour changer le domaine de veille technologique
+- Adapter les prompts LLM pour ajuster les informations extraites
+- Modifier le template HTML pour personnaliser le visuel
+
+---
+
+## Stack technique
+
+- **n8n** (workflow agentique)
+- **Azure OpenAI (GPT-5-mini)** (LLM et cloud)
+- **Azure Cognitive Search** (base de données et Cloud)
+- **YouTube Data API** (webscrapping)
+- **RapidAPI** (webscrapping)
+- **Gmail** (distribution)
