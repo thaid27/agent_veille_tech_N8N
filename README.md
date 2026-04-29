@@ -88,14 +88,14 @@ Modèle utilisé : **GPT-5-mini (Azure OpenAI)**
 
 ![newsletter_exemple_aperçu](assets/newsletter_preview.png)
 
-[newsletter complète](https://raw.githubusercontent.com/thaid27/agent_veille_tech_N8N/main/assets/newsletter_example.html)
+[newsletter complète](https://thaid27.github.io/agent_veille_tech_N8N/assets/newsletter_example.html)
 
 ---
 
 ## Valeur ajoutée
 
 ### Gain de temps
-Automatisation complète d’une veille hebdomadaire (plusieurs heures à environ 15 minutes)
+Automatisation complète d’une veille hebdomadaire (plusieurs heures à un processus automatisé)
 
 ### Qualité de la recherche
 - Sources sélectionnées et fiables
