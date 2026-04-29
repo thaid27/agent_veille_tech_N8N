@@ -1,0 +1,1905 @@
+{
+  "name": "Main",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 22
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -192,
+        656
+      ],
+      "id": "490805fd-f4f2-4004-a5f3-96cba5d8e335",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "channelId",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        448,
+        336
+      ],
+      "id": "36729673-ed6e-4e20-85d7-fae15508e8d1",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "jsCode": "const results = [];\n\nfor(const channel of $input.all()){\nfor (const item of channel.json.items) { \n    results.push({ \n      videoId: item.id.videoId, \n      title: item.snippet.title, \n      publishedAt: item.snippet.publishedAt, \n      channelId: item.snippet.channelId, \n      url: `https://www.youtube.com/watch?v=${item.id.videoId}`,\n    });\n}}\n\nreturn results;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1376,
+        336
+      ],
+      "id": "cd917731-eddb-4157-bb77-a9bd987f3262",
+      "name": "Extract Video Info"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1e338875-8504-4e93-9e73-1efb30ad1830",
+              "name": "channelId",
+              "value": "[\"UCIgnGlGkVRhd4qNFcEwLL4A\", \"UC9Ryt3XOGYBoAJVsBHNGDzA\"]",
+              "type": "array"
+            },
+            {
+              "id": "38dffdd4-c88b-4a87-86fc-afd22042e73a",
+              "name": "name",
+              "value": "[\"AI Search\", \"Theorically Media\"]",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        272,
+        336
+      ],
+      "id": "b85286f3-7914-4318-ad9a-42cee663ee96",
+      "name": "Channel To Search"
+    },
+    {
+      "parameters": {
+        "url": "https://www.googleapis.com/youtube/v3/search",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "part",
+              "value": "snippet"
+            },
+            {
+              "name": "channelId",
+              "value": "={{ $json.channelId }}"
+            },
+            {
+              "name": "order",
+              "value": "date"
+            },
+            {
+              "name": "maxResults",
+              "value": "2"
+            },
+            {
+              "name": "type",
+              "value": "video"
+            },
+            {
+              "name": "key",
+              "value": "api-key"
+            },
+            {
+              "name": "publishedAfter",
+              "value": "={{ $json.date_last_week }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1104,
+        336
+      ],
+      "id": "31497cef-ec3f-475e-8156-1900302dfb2f",
+      "name": "Get recent videos"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "url",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        1600,
+        144
+      ],
+      "id": "94b98861-e557-4e64-8dd1-f28967052795",
+      "name": "Split Out1"
+    },
+    {
+      "parameters": {
+        "url": "https://youtube-transcript3.p.rapidapi.com/api/transcript",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "videoId",
+              "value": "={{ $('Extract Video Info').item.json.videoId }}"
+            },
+            {
+              "name": "flat_text",
+              "value": "true"
+            },
+            {
+              "name": "lang",
+              "value": "en"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-rapidapi-host",
+              "value": "youtube-transcript3.p.rapidapi.com"
+            },
+            {
+              "name": "x-rapidapi-key",
+              "value": "api-key"
+            }
+          ]
+        },
+        "options": {
+          "batching": {
+            "batch": {
+              "batchSize": 1
+            }
+          }
+        }
+      },
+      "id": "d2d24148-2924-491e-9b49-ad1e54bc5cb3",
+      "name": "extractTranscript",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        1776,
+        144
+      ],
+      "typeVersion": 3
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "videoId",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        1568,
+        560
+      ],
+      "id": "8442a379-db7f-4aa9-9780-5998a03ac329",
+      "name": "Split Out2"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5ed6d82d-7be6-41f0-8109-db8322c1f172",
+              "name": "description",
+              "value": "={{ $json.items[0].snippet.localized.description }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1856,
+        560
+      ],
+      "id": "c43fda25-a028-4119-bd86-5f2b710863bd",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "url": "https://www.googleapis.com/youtube/v3/videos",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "part",
+              "value": "snippet"
+            },
+            {
+              "name": "id",
+              "value": "={{ $json.videoId }}"
+            },
+            {
+              "name": "key",
+              "value": "api-key"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1712,
+        560
+      ],
+      "id": "b834e3d6-a6f1-4383-a79d-dbcfa9fd4ace",
+      "name": "Get video description"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.rss }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        784,
+        784
+      ],
+      "id": "d43742c6-1004-4774-8e14-7f8c23e8b2ec",
+      "name": "RSS Read"
+    },
+    {
+      "parameters": {
+        "aggregate": "={{ $json['content:encodedSnippet'] }}",
+        "fieldsToAggregate": {
+          "fieldToAggregate": [
+            {}
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        992,
+        784
+      ],
+      "id": "11c65822-d604-40f5-88f3-698fec9161fb",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "rss",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        576,
+        784
+      ],
+      "id": "c3bd3d2b-73ca-4802-b41d-9c417bf66287",
+      "name": "Split Out3"
+    },
+    {
+      "parameters": {
+        "jsCode": "const now = new Date();\nconst lastWeek = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);\n\nlet news = $input.first().json.data\n// Filter items from the last 7 days\n.filter(n => new Date(n.isoDate) > lastWeek)\n// Sort newest → oldest\n.sort((a, b) => new Date(b.isoDate) - new Date(a.isoDate))\n// Limit to 10 most recent\n.slice(0, 10)\n// Map to dictionary format\n.map(n => ({\n  \"Info source\": n[\"content:encodedSnippet\"],\n}));\n\n// Return in n8n format\nreturn news.map(item => ({ json: item }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1216,
+        784
+      ],
+      "id": "628cb3e5-2e86-4b86-bbbc-a3161d543d04",
+      "name": "Blogpost sources",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "language": "python",
+        "pythonCode": "# Loop over input items and add a new field called 'myNewField' to the JSON of each one\noutput = []\n\nfor i, item in enumerate(items):\n  data = item[\"json\"]\n  \n  transcript = data.get(\"transcript\", \"\")\n  url = data.get(\"url\", \"\")\n  description = data.get(\"description\", \"\")\n  title = data.get(\"title\", \"\")\n\n  # Combine into one string (space-separated)\n  combined = f\"##Video {i+1}\\n\\n###Title: {title}\\n\\n ####Video url: {url} \\n\\n ###Description: {description} \\n\\n ####Transcript: {transcript}\"\n\n  # Append new dictionary with only one field\n  output.append({\n          \"Info source\": combined\n  })\n\nreturn output"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2416,
+        400
+      ],
+      "id": "3498fd98-592a-4bca-b83d-e13d7a0c93b3",
+      "name": "Youtube video sources"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        7792,
+        1104
+      ],
+      "id": "b9a3bb39-e0d2-4927-9aad-9dfb1146ee9f",
+      "name": "Merge3"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "77051667-6f15-4dce-b4db-546af586a060",
+              "name": "rss",
+              "value": "[\"https://medium.com/feed/@itxcrusher\"]",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        368,
+        784
+      ],
+      "id": "3caf08fd-5275-4d97-8641-2bd62ab64ff2",
+      "name": "Website list"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ea7dff6f-a7e6-4634-9d1c-f55dc09ccbb4",
+              "name": "Date",
+              "value": "={{ $now.toFormat(\"MMMM dd, yyyy\") }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        160,
+        1136
+      ],
+      "id": "04f9f85f-7ba1-4736-8451-ad9c07666463",
+      "name": "getDate"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Convert sources into html\n\n\nList of sources: \n\n{{ $json.combined_sources }}",
+        "options": {
+          "systemMessage": "=Change ALL the input into html with the following format:\nALL the input should be in the html. If the tools are presented multiple times, merge the different entries into one. \nDon't forgot anything from the input.\nSign with \"By Ogilvy AI.Lab\".\nThe response should be in English.\nTitle is \"Your weekly shot of tech news\".\n\nJust return the html page.\nDon't add anything. \n\n\nFollow the output format:\n\nExample:\n\n<div style=\"background-color:#EE1E41; color:white; padding:20px;\">\n\n<h2 style=\"text-align:left;\">Your weekly shot of tech news</h2>\n\n<!-- MIDJOURNEY -->\n<h3 style=\"text-align:left;\">#1 MIDJOURNEY V7 ALPHA: Personnalisation, rapidité et qualité redéfinies!</h3>\n<p style=\"text-align:left;\">La V7 Alpha est là, avec des prompts texte et image améliorés, une qualité d'image époustouflante et une cohérence inégalée. Personnalisation activée par défaut : adaptez le modèle à vos goûts en quelques minutes.Le \"Draft Mode\" révolutionne l'itération : créez 10 fois plus vite!</p>\n\n<h4 style=\"text-align:left;\">Key Features:</h4>\n<ul style=\"list-style:none; padding:0; text-align:left;\">\n<li>• Prompts texte et image améliorés</li>\n<li>• Personnalisation activée par défaut</li>\n<li>• Mode Draft pour génération rapide</li>\n<li>• Mode conversationnel et vocal</li>\n</ul>\n\n<h4 style=\"text-align:left;\">Particularities:</h4>\n<p style=\"text-align:left;\">Unique features with make the tool valuable\n\n<h4 style=\"text-align:left;\">Comparison with other tools:</h4>\n<p style=\"text-align:left;\">Par rapport à DALL·E ou Stable Diffusion, Midjourney V7 offre une meilleure cohérence visuelle et une personnalisation plus intuitive.</p>\n\n<p style=\"text-align:center;\">\n<a href=\"https://www.midjourney.com/\" style=\"background-color:black; color:white; padding:10px 20px; text-decoration:none; display:inline-block;\">Testez le ici</a>\n</p>\n\n<hr style=\"border: none; border-top: 1px solid white; width:80%; margin:auto;\">\n\n<!-- KLING -->\n<h3 style=\"text-align:left;\">#2 KLING 2.0 révolutionne la création vidéo avec l’IA</h3>\n<p style=\"text-align:left;\">Kuaishou frappe fort avec Kling 2.0, une IA générative pour vidéos et images. La \"MasterEdition\" offre une compréhension sémantique et un contrôle utilisateur améliorés.</p>\n\n<h4 style=\"text-align:left;\">Key Features:</h4>\n<ul style=\"list-style:none; padding:0; text-align:left;\">\n<li>• Génération vidéo et image haute qualité</li>\n<li>• Édition multimodale avancée</li>\n<li>• Contrôle utilisateur précis</li>\n<li>• Compréhension sémantique améliorée</li>\n</ul>\n\n<h4 style=\"text-align:left;\">Particularities:</h4>\n<p style=\"text-align:left;\">Unique features with make the tool valuable\n\n<h4 style=\"text-align:left;\">Comparison with other tools:</h4>\n<p style=\"text-align:left;\">Contrairement à Runway ou Pika Labs, Kling 2.0 se distingue par son outil d’édition multimodal et sa flexibilité dans le montage vidéo.</p>\n\n<p style=\"text-align:center;\">\n<a href=\"https://app.klingai.com/global/\" style=\"background-color:black; color:white; padding:10px 20px; text-decoration:none; display:inline-block;\">Testez le ici</a>\n</p>\n\n<hr style=\"border: none; border-top: 1px solid white; width:80%; margin:auto;\">\n\n<p style=\"text-align:center;\"><i>By Ogilvy AI.Lab</i></p>\n\n</div>\n\n\n\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        7296,
+        608
+      ],
+      "id": "2bb6cd1b-24fb-4de2-aafe-4da408bb8bb9",
+      "name": "Create newsletter"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "Summarize news",
+        "options": {
+          "systemMessage": "=You are an AI news summarization assistant.\nYour task is to summarize the information regarding new AI tools contained in the input which can be articles or video transcripts.\nList only the new tools discussed which are released and available for testing (no article paper, no robot demo, no coding model, no math model, ...) and related to the creative workflow (Image and video models, agents). \nThe input can contain multiple AI tools.\n\n\n**Information to retrieve:**\nName of the tool\nDescription (what it does, who it’s for, and why it’s important)\nKey features (bullet points)\nParticularities of the model disscussed in the source: (bullet points) (can be open source, less censored, cheap, ...)\nComparison with other models or previous version of the same tool disscussed in the source: (bullet points)\nLink to access or learn more (official website, blog post, or announcement link)\n\n\n**Output format:**\n\n\n**Name of Tool**\nDescription: ...\nKey features:\n- feature 1\n- feature 2 \nParticularities: \n- Particularity 1 \n- Particularity 2\nComparison:\n- Comparison 1\n- Comparison 2\nLink: ...\n______ (part of the output, separator between tools, put it even if there is only one tool)\n\n\n**Example:**\n\n\n**Ovi**\nOvi is an open-source AI video generator that creates videos with built-in audio, including dialogue and sound effects. It's designed for creators looking for a free and customizable tool for generating videos.\n\nKey Features:\n• Generates videos from text prompts (Text-to-Video).\n• Converts images to videos with audio (Image-to-Video).\n• Supports multiple characters and languages.\n• Includes sound effects and singing capabilities.\nParticularities:\nCompletely open-source and free to use. Can run locally on lower VRAM systems using ComfyUI, allowing broader accessibility.\n\nComparison with other tools:\nQuality is not as high as some closed-source models like V3 and Sora 2, but Ovi is the first of its kind to be open-source. Has capabilities like generating videos from realistic images which previous models do not allow.\n\nLink: ...\n______\n\n\n**Rules:**\n- Don’t add any information not contained in the input source.\n- Please, don't put any double quotes in your output. \n- Please RESPECT the output format given. \n- Complete every field of the output format thoroughly, using all information from the input.\n- be exhaustive relating the information contained in the source\n\nInput:\n\n{{ $json['Info source'] }}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        2784,
+        528
+      ],
+      "id": "e120d8df-0e73-47a1-909b-74f9976d89c7",
+      "name": "Summarize sources"
+    },
+    {
+      "parameters": {
+        "language": "python",
+        "pythonCode": "# Loop over input items and add a new field called 'myNewField' to the JSON of each one\ncombined = \"\"\n\nfor i, item in enumerate(_input.all()):\n  combined += f\"{item.json.toolDescription}\\n\\n\\n\\n\"\n\n  \nreturn {\"combined_sources\": combined}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        7120,
+        608
+      ],
+      "id": "38f4b1e7-c6de-4171-a1e8-a5c3e9637721",
+      "name": "group sources"
+    },
+    {
+      "parameters": {
+        "language": "python",
+        "pythonCode": "input = _input.first().json.output \nclean_output = input.replace(\"\\n\",\"\")\nclean_output = clean_output.replace(\"```html\",\"\")\nclean_output = clean_output.replace(\"```\",\"\")\n\nreturn {\"html_page\": clean_output}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        7584,
+        800
+      ],
+      "id": "831ffcfb-8ca0-4c55-9f24-1e8eb8cebc94",
+      "name": "Code in Python (Beta)"
+    },
+    {
+      "parameters": {
+        "jsCode": "const inputDateStr = $input.first().json.Date;\n\n// Convert to Date object\nconst inputDate = new Date(inputDateStr);\n\n// Calculate last week's date\nconst lastWeekDate = new Date(inputDate);\nlastWeekDate.setDate(inputDate.getDate() - 7);\n\n// Set time to 6:00 AM UTC\nlastWeekDate.setUTCHours(6, 0, 0, 0);\n\n// Return in ISO 8601 format\nreturn { \"date_last_week\": lastWeekDate.toISOString() };"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        464,
+        1008
+      ],
+      "id": "8ed30eb9-0828-4132-8b65-ebd589d4686e",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "model": "gpt-5-mini",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAzureOpenAi",
+      "typeVersion": 1,
+      "position": [
+        2784,
+        752
+      ],
+      "id": "6caa3f21-b29f-4faa-b139-642d8033209f",
+      "name": "Azure OpenAI Chat Model1"
+    },
+    {
+      "parameters": {
+        "model": "gpt-5-mini",
+        "options": {
+          "timeout": 10000000
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAzureOpenAi",
+      "typeVersion": 1,
+      "position": [
+        7296,
+        944
+      ],
+      "id": "1f91b27c-ca49-4854-b58d-9ce2e38c3505",
+      "name": "Azure OpenAI Chat Model"
+    },
+    {
+      "parameters": {
+        "language": "python",
+        "pythonCode": "import re\n\ndef parse_tools(text):\n  # Pattern: separator, optional whitespace, **Tool Name**, then capture description until next separator\n  text = \"______\\n\\n\" + text\n  pattern = r'_{6,}\\s*\\*\\*(.*?)\\*\\*\\s*(.*?)(?=_{6,}|$)'\n  matches = re.findall(pattern, text, re.DOTALL)\n  \n  result = []\n  for tool_name, description in matches:\n      result.append({\n          \"toolName\": tool_name.strip(),\n          \"toolDescription\": f\"**{tool_name.strip()}**\\n\" +     description.strip()\n      })\n  \n  return result\n  \nreturn parse_tools(_input.first().json.output)"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3616,
+        528
+      ],
+      "id": "244d0033-5ced-425f-8ec4-8556f927960d",
+      "name": "Code in Python (Beta)1"
+    },
+    {
+      "parameters": {
+        "model": "gpt-5-mini",
+        "options": {
+          "timeout": 10000000
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAzureOpenAi",
+      "typeVersion": 1,
+      "position": [
+        3296,
+        752
+      ],
+      "id": "386edc0a-3d7a-447e-aafa-6b15e7a45b28",
+      "name": "Azure OpenAI Chat Model2"
+    },
+    {
+      "parameters": {
+        "language": "python",
+        "pythonCode": "# Loop over input items and add a new field called 'myNewField' to the JSON of each one\ncombined = \"\"\n\nfor i, item in enumerate(_input.all()):\n  combined += f\"{item.json[\"output\"]}\\n\\n\\n\\n\"\n\n  \nreturn {\"combined_sources\": combined}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3104,
+        528
+      ],
+      "id": "916f3316-6ec4-4cbf-8909-9b699e5eaf40",
+      "name": "group sources1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "Merge entries regarding the same tools",
+        "options": {
+          "systemMessage": "=You are an AI news researcher.\nYou'll be given series on snippet on new AI tools. Your role is to merge the entries for the same tool into one which combined all the information of the different entries. If there is multiple tier of the same tools (for exemple pro version), merge them together in a snippet describing both version. \n\nLeave the other tools' descriptions untouched. \n\n**Important**: Return ALL the tools mentionned in the input.\n\n**Output format:**\n\n**Name of Tool**\nDescription: ...\nKey features:\n- feature 1\n- feature 2 \nParticularities: \n- Particularity 1 \n- Particularity 2\nComparison:\n- Comparison 1\n- Comparison 2\nLink: ...\n______ (separator between tools)\n\n**Example:**\n\n**Ovi**\nOvi is an open-source AI video generator that creates videos with built-in audio, including dialogue and sound effects. It's designed for creators looking for a free and customizable tool for generating videos.\n\nKey Features:\n• Generates videos from text prompts (Text-to-Video).\n• Converts images to videos with audio (Image-to-Video).\n• Supports multiple characters and languages.\n• Includes sound effects and singing capabilities.\nParticularities:\nCompletely open-source and free to use. Can run locally on lower VRAM systems using ComfyUI, allowing broader accessibility.\n\nComparison with other tools:\nQuality is not as high as some closed-source models like V3 and Sora 2, but Ovi is the first of its kind to be open-source. Has capabilities like generating videos from realistic images which previous models do not allow.\n\nLink: ...\n______\n\n\n**Rules:**\n- return ALL the tools mentionned in the input (untouched or merged version)\n- Don’t add any information not contained in the input source.\n- Please RESPECT the output format given. \n- Complete every field of the output format thoroughly, using all information from the input.\n\n\nInput:\n\n{{ $json.combined_sources }}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        3296,
+        528
+      ],
+      "id": "73cc13b9-415a-4328-9b14-474102c0b417",
+      "name": "Merge Sources"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "endpoint",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "api-key",
+              "value": "api-key"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "input",
+              "value": "={{ $json.toolDescription }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        6512,
+        448
+      ],
+      "id": "befcdad9-d855-4d0d-88b6-a110e03d390c",
+      "name": "Get embeddings"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        4048,
+        544
+      ],
+      "id": "0572d919-4872-4d79-8fea-052cee1492eb",
+      "name": "Merge4"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f6c04036-7d77-4194-864e-d4cf3fd2837d",
+              "name": "value",
+              "value": "={{ $json.value }}",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3920,
+        688
+      ],
+      "id": "e56000e3-adcc-4c93-80f7-643df560f170",
+      "name": "Edit Fields2"
+    },
+    {
+      "parameters": {
+        "model": "gpt-5-mini",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAzureOpenAi",
+      "typeVersion": 1,
+      "position": [
+        4464,
+        800
+      ],
+      "id": "01395440-5709-425f-bf84-2b3bf16c078e",
+      "name": "Azure OpenAI Chat Model3"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "21dc3ef4-5fec-4e40-a972-468f75a657f0",
+              "name": "embeddings",
+              "value": "={{ $json.data[0].embedding }}",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        6752,
+        448
+      ],
+      "id": "30d50683-892b-4a37-a7d1-8f1aa903fe08",
+      "name": "cleaning"
+    },
+    {
+      "parameters": {
+        "url": "https://newsletter-database.search.windows.net/indexes/newsletter-aitools-database/docs/$count",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "api-version",
+              "value": "2023-07-01-Preview"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "api-key",
+              "value": "api-key"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        272,
+        48
+      ],
+      "id": "aac2a5f6-f9ab-4adb-bac3-0eba261d7106",
+      "name": "getNbDocs"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "numberInputs": 3,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        2176,
+        384
+      ],
+      "id": "3ee37c61-2674-4753-89ad-aed2bd2f8f63",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "language": "python",
+        "pythonCode": "from datetime import datetime\n\n# Example input\ninput_date = _input.first().json.Date\n\n# Parse the date string\nparsed_date = datetime.strptime(input_date, \"%B %d, %Y\")\n\n# Convert to ISO 8601 UTC format\niso_date = parsed_date.isoformat() + \"Z\"\n\nreturn {\"todaydate\": iso_date}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4224,
+        0
+      ],
+      "id": "6c32afd1-d97f-4c13-8900-9c34d0e03452",
+      "name": "Iso Date"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        656,
+        336
+      ],
+      "id": "e79da12f-183c-4052-804c-5e2ef948a1a7",
+      "name": "Merge8"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        6240,
+        464
+      ],
+      "id": "643f7441-6c9f-4e21-8623-1fe1d1264a03",
+      "name": "Merge new and revised snippets"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "12e9c9f0-cb99-449e-93aa-3b14c7342853",
+              "leftValue": "={{ $json.value }}",
+              "rightValue": "[]",
+              "operator": {
+                "type": "array",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        4192,
+        544
+      ],
+      "id": "051062b2-b46f-4553-bcc9-4a5b712bfc3c",
+      "name": "New Tool ?"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "endpoint",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "api-key",
+              "value": "api-key"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "=search",
+              "value": "=\"{{ $json.toolName }}\""
+            },
+            {
+              "name": "top",
+              "value": "1"
+            },
+            {
+              "name": "searchFields",
+              "value": "toolName"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3760,
+        688
+      ],
+      "id": "5387b7a0-4d64-4ae4-9b34-9789cfcc3d03",
+      "name": "Search for same tool in DB"
+    },
+    {
+      "parameters": {
+        "language": "python",
+        "pythonCode": "# Loop over input items and add a new field called 'myNewField' to the JSON of each one\nfor item in _input.all()[1:]:\n  item.json.date_last_week = _input.first().json.date_last_week\nreturn _input.all()[1:]"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        864,
+        336
+      ],
+      "id": "ac9c07ea-0497-4ad0-b626-1a0096647bff",
+      "name": "Code in Python (Beta)2"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        4880,
+        -16
+      ],
+      "id": "2717fa91-e7e0-4697-9062-a2f31a570b2b",
+      "name": "date + nb docs"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        7328,
+        112
+      ],
+      "id": "d2a733ac-8e28-4484-807f-54e9c994d94d",
+      "name": "metadata"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        6944,
+        432
+      ],
+      "id": "b9cc15a7-fadb-4dd0-8b0c-09c6e6c6067a",
+      "name": "Merge with embeddings"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c37a438c-2c5d-4935-a9c1-ff983795c516",
+              "name": "toolName",
+              "value": "={{ $json.toolName }}",
+              "type": "string"
+            },
+            {
+              "id": "86d9ca64-4c35-49fa-8e2b-316286ad1018",
+              "name": "toolDescription",
+              "value": "={{ $json.toolDescription }}",
+              "type": "string"
+            },
+            {
+              "id": "069bbd4d-3313-4ae6-b5c1-e1d6e9e1bfb1",
+              "name": "id",
+              "value": "={{ $json.id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        6480,
+        288
+      ],
+      "id": "b02877ed-28fb-4255-8a43-dc40cdf91fae",
+      "name": "Edit Fields5"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c4ead620-ba09-4033-9d6a-24cbe1a1abad",
+              "leftValue": "={{ $json.output }}",
+              "rightValue": "\"\"",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        5408,
+        752
+      ],
+      "id": "0fa32f23-aab2-496a-8e42-8beb19125d13",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "Is there new substantial info in the new description ? if no, return \"\",\nif yes, merge the old and new description",
+        "options": {
+          "systemMessage": "=You are an AI news researcher. You'll be given two descriptions (one new and one old) on the same AI tools. Your role is to identify if there is any substential information like new updates, new features discovered added by the new descrition compared to the old description.\n\n**Rules:**\n\nIf there is no new substential information, return empty quotes (\"\")\nelse merge the two descritpions of the tool. \nIf there is conflicting information, use the details from the newest description.\nreturn also **new addtions section**: this section explained the difference between old and new tool description.\n\n\n\n**Output format:** (if there is new information)\n\n**Name of Tool**\nDescription: ...\nKey features:\n- feature 1\n- feature 2 \nParticularities: \n- Particularity 1 \n- Particularity 2\nComparison:\n- Comparison 1\n- Comparison 2\nLink: ...\n\nnew addtions section: ...\n\n**Example:**\n\n**Ovi**\nOvi is an open-source AI video generator that creates videos with built-in audio, including dialogue and sound effects. It's designed for creators looking for a free and customizable tool for generating videos.\n\nKey Features:\n• Generates videos from text prompts (Text-to-Video).\n• Converts images to videos with audio (Image-to-Video).\n• Supports multiple characters and languages.\n• Includes sound effects and singing capabilities.\nParticularities:\nCompletely open-source and free to use. Can run locally on lower VRAM systems using ComfyUI, allowing broader accessibility.\n\nComparison with other tools:\nQuality is not as high as some closed-source models like V3 and Sora 2, but Ovi is the first of its kind to be open-source. Has capabilities like generating videos from realistic images which previous models do not allow.\n\nLink: ...\n\n\n**Inputs:**\n\nOld description of the tool: \n\"\n{{ $json.value[0].toolDescription }}\n\"\n\nNew description of the tool\n\"\n{{ $json.toolDescription }}\n\"\n\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        4432,
+        304
+      ],
+      "id": "663b2eda-856a-47f8-a493-5ec55fa3acf2",
+      "name": "New info ?"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        4880,
+        752
+      ],
+      "id": "13621b48-c38c-4b3d-a801-b2c669f54744",
+      "name": "Merge1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "13baa91d-07e6-4548-9c44-68c4febb655a",
+              "name": "toolName",
+              "value": "={{ $json.toolName }}",
+              "type": "string"
+            },
+            {
+              "id": "fad52c16-4556-4a9a-a1d7-8a1550f9e944",
+              "name": "toolDescription",
+              "value": "={{ $json.output }}",
+              "type": "string"
+            },
+            {
+              "id": "19d9fb43-5992-483f-9f27-f8469a7af490",
+              "name": "id",
+              "value": "={{ $json.value[0].id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        5680,
+        736
+      ],
+      "id": "bb4398da-6c77-4296-8307-4bf4ac15926d",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "12e9c9f0-cb99-449e-93aa-3b14c7342853",
+              "leftValue": "={{ $json.id }}",
+              "rightValue": "[]",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        7056,
+        208
+      ],
+      "id": "343ab62d-7e8e-433f-99e4-f816c41058aa",
+      "name": "is new tool"
+    },
+    {
+      "parameters": {
+        "language": "python",
+        "pythonCode": "# Loop over input items and add a new field called 'myNewField' to the JSON of each one\nnb_docs = _input.first().json.data\ndate = _input.first().json.todaydate\n\ntool_data = _input.all()[1:]\n\nfor i, item in enumerate(tool_data):\n  item.json.id = 1 + i + int(nb_docs)\n  item.json.toolDate = date\n  \nreturn _input.all()[1:]\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        7568,
+        304
+      ],
+      "id": "328ccfa1-f950-4d93-b485-360331cf3848",
+      "name": "AddID1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "endpoint",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "api-key",
+              "value": "api-key"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"value\": [{\n    \"@search.action\": \"upload\",\n    \"id\": \"{{ $json.id }}\",\n    \"toolName\": \"{{ $json.toolName }}\",\n    \"toolDescription\": {{ $json.toolDescription }},\n    \"toolDate\": [\"{{ $json.toolDate }}\"],\n    \"embeddings\": [{{ $json.embeddings }}]\n  }]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        8288,
+        208
+      ],
+      "id": "bfeb26ce-6c24-4715-8567-57fc5d63581e",
+      "name": "insert in DB1"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nfor (const item of $input.all()) {\n  item.json.toolDescription = JSON.stringify(item.json.toolDescription.replace(/[\"'“”‘’]/g, ''));\n}\n\nreturn $input.all();"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        8032,
+        208
+      ],
+      "id": "08dcf45d-9c84-4dd8-b444-e26f11f4f2d9",
+      "name": "formatting1"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        7328,
+        304
+      ],
+      "id": "9095e3aa-5bb3-43e4-962c-6b71edf8044f",
+      "name": "Merge5"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        7792,
+        208
+      ],
+      "id": "0d56a744-cfe4-45c9-a86f-2c11b4673100",
+      "name": "Merge6"
+    },
+    {
+      "parameters": {
+        "language": "python",
+        "pythonCode": "# Loop over input items and add a new field called 'myNewField' to the JSON of each one\nnb_docs = _input.first().json.data\ndate = _input.first().json.todaydate\n\ntool_data = _input.all()[1:]\n\nfor i, item in enumerate(tool_data):\n  item.json.id = item.json.id\n  item.json.toolDate = date\n  \nreturn _input.all()[1:]\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        7568,
+        112
+      ],
+      "id": "82616bb0-bf0e-4ac4-8be4-c1d208d64e67",
+      "name": "OldID"
+    },
+    {
+      "parameters": {
+        "language": "python",
+        "pythonCode": "# Loop over input items and add a new field called 'myNewField' to the JSON of each one\nfor item in _input.all():\n  item.json.output =  item.json.output.replace(\"\\n\",\"\")\nreturn _input.all()"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5088,
+        752
+      ],
+      "id": "ffc2f9ec-43a0-43b6-87fc-198edb65a9c1",
+      "name": "Code in Python (Beta)3"
+    },
+    {
+      "parameters": {
+        "subject": "=Newletters, {{ $json.Date }}",
+        "message": "={{ $json.html_final }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        8016,
+        1104
+      ],
+      "id": "3b843397-6346-410b-bfca-4cdad0e64249",
+      "name": "Send a message",
+      "webhookId": "1a8c1a6c-8e4b-4578-a089-2443e8effa70",
+      "disabled": true
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Channel To Search",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Website list",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "getDate",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "getNbDocs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Merge8",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Extract Video Info": {
+      "main": [
+        [
+          {
+            "node": "Split Out1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Split Out2",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Channel To Search": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get recent videos": {
+      "main": [
+        [
+          {
+            "node": "Extract Video Info",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out1": {
+      "main": [
+        [
+          {
+            "node": "extractTranscript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "extractTranscript": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out2": {
+      "main": [
+        [
+          {
+            "node": "Get video description",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Get video description": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Read": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "Blogpost sources",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out3": {
+      "main": [
+        [
+          {
+            "node": "RSS Read",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Youtube video sources": {
+      "main": [
+        [
+          {
+            "node": "Summarize sources",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Website list": {
+      "main": [
+        [
+          {
+            "node": "Split Out3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "getDate": {
+      "main": [
+        [
+          {
+            "node": "Merge3",
+            "type": "main",
+            "index": 1
+          },
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Iso Date",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create newsletter": {
+      "main": [
+        [
+          {
+            "node": "Code in Python (Beta)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Summarize sources": {
+      "main": [
+        [
+          {
+            "node": "group sources1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "group sources": {
+      "main": [
+        [
+          {
+            "node": "Create newsletter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in Python (Beta)": {
+      "main": [
+        [
+          {
+            "node": "Merge3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Merge8",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Azure OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Summarize sources",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Azure OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Create newsletter",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in Python (Beta)1": {
+      "main": [
+        [
+          {
+            "node": "Search for same tool in DB",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Azure OpenAI Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Merge Sources",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "group sources1": {
+      "main": [
+        [
+          {
+            "node": "Merge Sources",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Sources": {
+      "main": [
+        [
+          {
+            "node": "Code in Python (Beta)1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge4": {
+      "main": [
+        [
+          {
+            "node": "New Tool ?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get embeddings": {
+      "main": [
+        [
+          {
+            "node": "cleaning",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields2": {
+      "main": [
+        [
+          {
+            "node": "Merge4",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Azure OpenAI Chat Model3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "New info ?",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "cleaning": {
+      "main": [
+        [
+          {
+            "node": "Merge with embeddings",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "getNbDocs": {
+      "main": [
+        [
+          {
+            "node": "date + nb docs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Youtube video sources",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Iso Date": {
+      "main": [
+        [
+          {
+            "node": "date + nb docs",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge8": {
+      "main": [
+        [
+          {
+            "node": "Code in Python (Beta)2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge new and revised snippets": {
+      "main": [
+        [
+          {
+            "node": "Get embeddings",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Edit Fields5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "New Tool ?": {
+      "main": [
+        [
+          {
+            "node": "Merge new and revised snippets",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "New info ?",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Search for same tool in DB": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in Python (Beta)2": {
+      "main": [
+        [
+          {
+            "node": "Get recent videos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "date + nb docs": {
+      "main": [
+        [
+          {
+            "node": "metadata",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "metadata": {
+      "main": [
+        [
+          {
+            "node": "OldID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge with embeddings": {
+      "main": [
+        [
+          {
+            "node": "group sources",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "is new tool",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields5": {
+      "main": [
+        [
+          {
+            "node": "Merge with embeddings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "New info ?": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "Code in Python (Beta)3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Merge new and revised snippets",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "is new tool": {
+      "main": [
+        [
+          {
+            "node": "metadata",
+            "type": "main",
+            "index": 1
+          }
+        ],
+        [
+          {
+            "node": "Merge5",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "AddID1": {
+      "main": [
+        [
+          {
+            "node": "Merge6",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "formatting1": {
+      "main": [
+        [
+          {
+            "node": "insert in DB1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge5": {
+      "main": [
+        [
+          {
+            "node": "AddID1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OldID": {
+      "main": [
+        [
+          {
+            "node": "Merge6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge6": {
+      "main": [
+        [
+          {
+            "node": "formatting1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in Python (Beta)3": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Blogpost sources": {
+      "main": [
+        [
+          {
+            "node": "Split Out2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge3": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "8bfaa640-7fbe-4188-877a-49005e162e6e",
+  "meta": {
+    "instanceId": "0ca897d79d73b0b0b96723dab77cd740626628e8281a031b07a8e0ebc9bdc6bc"
+  },
+  "id": "v16WPGf8GadqxOxR",
+  "tags": []
+}
