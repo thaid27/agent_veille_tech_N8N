@@ -80,13 +80,15 @@ Modèle utilisé : **GPT-5-mini (Azure OpenAI)**
 
 ## Architecture
 
-image
+![architecture de l'agent](assets/architecture.png)
 
 ---
 
 ## Exemple de newsletter
 
-image
+![newsletter_exemple_aperçu](assets/newsletter_preview.png)
+
+[newsletter complète](https://raw.githubusercontent.com/thaid27/agent_veille_tech_N8N/main/assets/newsletter_example.html)
 
 ---
 
