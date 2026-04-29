@@ -121,7 +121,7 @@ Automatisation complète d’une veille hebdomadaire (plusieurs heures à un pro
 
 ### Configuration
 
-1. Importer le workflow n8n
+1. Importer le workflow n8n : [workflow](workflow/agent_veille_tech.json)
 2. Ajouter les credentials :
    - API keys
    - endpoints
