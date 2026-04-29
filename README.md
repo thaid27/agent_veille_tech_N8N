@@ -125,19 +125,17 @@ Automatisation complète d’une veille hebdomadaire (plusieurs heures à un pro
 2. Ajouter les credentials :
    - API keys
    - endpoints
-3. Configurer :
-   - les sources (RSS / YouTube)
-   - les prompts LLM
-   - le template HTML de la newsletter
-4. Définir la liste des destinataires
+4. Remplir la liste des destinataires
 5. Connecter Gmail
 
 ---
 
 ## Personnalisation
 
-- Modifier les sources pour changer le domaine de veille technologique
-- Adapter les prompts LLM pour ajuster les informations extraites
+- Modifier les sources pour changer le domaine de la veille technologique :
+   - pour les sources RSS : trouver l'adresse du flux RSS du site et le champ contenant les artciles
+   - pour les sources YouTube : en trouver l'ID et le nom des chaines ciblées
+- Adapter les prompts LLM pour ajuster les informations à extraire
 - Modifier le template HTML pour personnaliser le visuel
 
 ---
