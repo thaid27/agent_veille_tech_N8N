@@ -27,9 +27,9 @@ Deux types de sources sont exploités :
 
 #### Chaînes YouTube (IA)
 - Utilisation de **YouTube Data API** :
-  - Récupération des ID des vidéos publiées dans la semaine
-  - Extraction des descriptions (contenant les liens d’outils explorés)
-- Récupération des **transcriptions** à partir de ces ID via une API externe (RapidAPI)
+  - Récupération des IDs des vidéos publiées dans la semaine
+  - Extraction des descriptions (contenant les liens des outils explorés dans la vidéo)
+- Récupération des **transcriptions** à partir de ces IDs via une API externe (RapidAPI)
 
 ---
 
