@@ -145,6 +145,6 @@ Automatisation complète d’une veille hebdomadaire (plusieurs heures à un pro
 - **n8n** (workflow agentique)
 - **Azure OpenAI (GPT-5-mini)** (LLM et cloud)
 - **Azure Cognitive Search** (base de données et Cloud)
-- **YouTube Data API** (webscrapping)
-- **RapidAPI** (webscrapping)
+- **YouTube Data API** (web scraping)
+- **RapidAPI** (web scraping)
 - **Gmail** (distribution)
